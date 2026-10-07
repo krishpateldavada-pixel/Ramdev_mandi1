@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <a href="{{ url_for('purchases') }}" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1"></i> Purchases</a>
+    <div>
+        <button onclick="window.print()" class="btn btn-mandi me-2"><i class="fa-solid fa-print me-1"></i> Print Receipt</button>
+        <a href="{{ url_for('pdf_purchase_receipt', id=p.id) }}" class="btn btn-danger"><i class="fa-solid fa-file-pdf me-1"></i> Download PDF</a>
+    </div>
+</div>
+
+<div class="card shadow-lg border-0 p-4 bg-white" id="receipt">
+    <!-- Header Branding -->
+    <div class="text-center mandi-header-brand mb-4">
+        <h2 class="fw-bold text-mandi mb-0">{{ biz.name }}</h2>
+        <p class="mb-0 fw-semibold">Shop No. {{ biz.shop_no }}, {{ biz.market }}</p>
+        <p class="mb-0 text-muted">{{ biz.type }} | {{ biz.location }}</p>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-6">
+            <h6 class="fw-bold text-mandi">FARMER RECEIPT</h6>
+            <p class="mb-1"><strong>Receipt No:</strong> PUR-{{ p.id }}</p>
+            <p class="mb-0"><strong>Date:</strong> {{ p.date }}</p>
+        </div>
+        <div class="col-6 text-end">
+            <h6 class="fw-bold">FARMER DETAILS</h6>
+            <p class="mb-1"><strong>{{ p.farmer_name }}</strong></p>
+            <p class="mb-1">Village: {{ p.village }}</p>
+            <p class="mb-0">Mobile: {{ p.mobile }}</p>
+        </div>
+    </div>
+
+    <table class="table table-bordered mb-4">
+        <thead class="table-light">
+            <tr>
+                <th>Product</th>
+                <th>Lots</th>
+                <th>KG Quantity</th>
+                <th>Rate / KG</th>
+                <th class="text-end">Gross Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ p.product_name }}</td>
+                <td>{{ p.lots }} Lots</td>
+                <td>{{ p.kg }} KG</td>
+                <td>₹{{ p.rate_per_kg }}</td>
+                <td class="text-end">₹{{ "%.2f"|format(p.gross_amount) }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="row">
+        <div class="col-6">
+            <p><strong>Quality / Grade:</strong> {{ p.quality or 'N/A' }}</p>
+            <p><strong>Moisture %:</strong> {{ p.moisture }}%</p>
+            <p><strong>Batch / Lot No:</strong> {{ p.lot_number or 'N/A' }}</p>
+            <p><strong>Payment Status:</strong> <span class="badge bg-secondary">{{ p.payment_status }}</span></p>
+        </div>
+        <div class="col-6">
+            <table class="table table-sm table-borderless">
+                <tr><td>Transport Charges:</td><td class="text-end">₹{{ "%.2f"|format(p.transport_charges) }}</td></tr>
+                <tr><td>Other Charges:</td><td class="text-end">₹{{ "%.2f"|format(p.other_charges) }}</td></tr>
+                <tr class="fw-bold border-top"><td>Net Payable:</td><td class="text-end">₹{{ "%.2f"|format(p.net_payable) }}</td></tr>
+                <tr><td>Paid Amount:</td><td class="text-end text-success">₹{{ "%.2f"|format(p.paid_amount) }}</td></tr>
+                <tr class="fw-bold border-top"><td>Remaining Due:</td><td class="text-end text-danger">₹{{ "%.2f"|format(p.remaining_amount) }}</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-5 pt-4 d-flex justify-content-between text-center">
+        <div>
+            <p class="mb-0">___________________________</p>
+            <small>Farmer Signature</small>
+        </div>
+        <div>
+            <p class="mb-0">___________________________</p>
+            <small>Authorized Signature ({{ biz.name }})</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

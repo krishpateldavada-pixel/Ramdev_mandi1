@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold text-mandi">Party Ledgers Statement</h3>
+    {% if party %}
+    <button onclick="window.print()" class="btn btn-outline-secondary"><i class="fa-solid fa-print me-1"></i> Print Statement</button>
+    {% endif %}
+</div>
+
+<div class="card border-0 shadow-sm mb-4 no-print">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('ledger') }}" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Party Type</label>
+                <select name="party_type" class="form-select" onchange="this.form.submit()">
+                    <option value="Farmer" {% if party_type=='Farmer' %}selected{% endif %}>Farmer</option>
+                    <option value="Customer" {% if party_type=='Customer' %}selected{% endif %}>Customer</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Select {{ party_type }}</label>
+                <select name="party_id" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Choose --</option>
+                    {% if party_type == 'Farmer' %}
+                        {% for f in farmers %}
+                        <option value="{{ f.id }}" {% if party_id==f.id %}selected{% endif %}>{{ f.name }}</option>
+                        {% endfor %}
+                    {% else %}
+                        {% for c in customers %}
+                        <option value="{{ c.id }}" {% if party_id==c.id %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if party %}
+<div class="card border-0 shadow-sm p-4 bg-white">
+    <div class="text-center mandi-header-brand mb-4">
+        <h3 class="fw-bold text-mandi mb-0">{{ biz.name }}</h3>
+        <p class="mb-0">Shop No. {{ biz.shop_no }}, {{ biz.market }} | {{ biz.location }}</p>
+    </div>
+
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            <h5 class="fw-bold text-mandi mb-0">{{ party.name }}</h5>
+            <small class="text-muted">{{ party_type }} Statement</small>
+        </div>
+        <div class="text-end">
+            <p class="mb-0"><strong>Generated Date:</strong> {{ today }}</p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <thead class="table-light">
+                <tr><th>Date</th><th>Type</th><th>Description</th><th class="text-end">Debit (Dr)</th><th class="text-end">Credit (Cr)</th><th class="text-end">Running Balance</th></tr>
+            </thead>
+            <tbody>
+                {% for e in entries %}
+                <tr>
+                    <td>{{ e.date }}</td>
+                    <td><span class="badge bg-secondary">{{ e.type }}</span></td>
+                    <td>{{ e.description }}</td>
+                    <td class="text-end text-danger">{% if e.debit > 0 %}₹{{ "%.2f"|format(e.debit) }}{% else %}-{% endif %}</td>
+                    <td class="text-end text-success">{% if e.credit > 0 %}₹{{ "%.2f"|format(e.credit) }}{% else %}-{% endif %}</td>
+                    <td class="text-end fw-bold">₹{{ "%.2f"|format(e.balance) }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-3">No transactions logged for this party.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info text-center">Please select a party type and name to view the ledger.</div>
+{% endif %}
+{% endblock %}

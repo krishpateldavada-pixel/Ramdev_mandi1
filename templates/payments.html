@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold text-mandi">Payment Management</h3>
+    <button class="btn btn-mandi" data-bs-toggle="modal" data-bs-target="#addPaymentModal"><i class="fa-solid fa-plus me-1"></i> Record Payment</button>
+</div>
+
+<h5 class="fw-bold mb-3">Payment History</h5>
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr><th>ID</th><th>Date</th><th>Party Type</th><th>Party Name</th><th>Ref Type</th><th>Ref #</th><th>Amount</th><th>Method</th><th>Ref No.</th></tr>
+                </thead>
+                <tbody>
+                    {% for p in payments %}
+                    <tr>
+                        <td>#{{ p.id }}</td>
+                        <td>{{ p.date }}</td>
+                        <td><span class="badge bg-{% if p.party_type=='Farmer' %}success{% else %}primary{% endif %}">{{ p.party_type }}</span></td>
+                        <td class="fw-bold">{{ p.party_name }}</td>
+                        <td>{{ p.ref_type }}</td>
+                        <td>#{{ p.ref_id }}</td>
+                        <td class="fw-bold text-mandi">₹{{ p.amount }}</td>
+                        <td>{{ p.method }}</td>
+                        <td><small>{{ p.ref_number or '-' }}</small></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="9" class="text-center text-muted py-3">No payment records found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Payment Modal -->
+<div class="modal fade" id="addPaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('payments') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-mandi">Record New Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Payment Date *</label>
+                        <input type="date" name="date" class="form-control" value="{{ today }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Party Type *</label>
+                        <select name="party_type" id="party_type_select" class="form-select" required onchange="toggleRefDropdowns()">
+                            <option value="Farmer">Farmer (Payout)</option>
+                            <option value="Customer">Customer (Receipt)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="farmer_ref_div">
+                        <label class="form-label">Select Pending Purchase Invoice *</label>
+                        <select name="ref_id" id="farmer_ref_id" class="form-select">
+                            {% for p in pending_purchases %}
+                            <option value="{{ p.id }}">PUR-{{ p.id }} | {{ p.farmer_name }} | Due: ₹{{ p.remaining_amount }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3 d-none" id="customer_ref_div">
+                        <label class="form-label">Select Pending Customer Sale Invoice *</label>
+                        <select name="ref_id" id="customer_ref_id" class="form-select" disabled>
+                            {% for s in pending_sales %}
+                            <option value="{{ s.id }}">INV-{{ s.id }} | {{ s.customer_name }} | Due: ₹{{ s.remaining_amount }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Amount (₹) *</label>
+                        <input type="number" step="0.01" name="amount" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method *</label>
+                        <select name="method" class="form-select" required>
+                            <option value="Cash">Cash</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cheque">Cheque</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Transaction Reference Number</label>
+                        <input type="text" name="ref_number" class="form-control" placeholder="UPI Ref / Cheque No">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-mandi">Submit Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleRefDropdowns() {
+    const pType = document.getElementById('party_type_select').value;
+    const fDiv = document.getElementById('farmer_ref_div');
+    const cDiv = document.getElementById('customer_ref_div');
+    const fSelect = document.getElementById('farmer_ref_id');
+    const cSelect = document.getElementById('customer_ref_id');
+
+    if (pType === 'Farmer') {
+        fDiv.classList.remove('d-none');
+        cDiv.classList.add('d-none');
+        fSelect.disabled = false;
+        cSelect.disabled = true;
+    } else {
+        cDiv.classList.remove('d-none');
+        fDiv.classList.add('d-none');
+        cSelect.disabled = false;
+        fSelect.disabled = true;
+    }
+}
+</script>
+{% endblock %}

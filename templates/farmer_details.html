@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-3">
+    <a href="{{ url_for('farmers') }}" class="text-decoration-none text-muted"><i class="fa-solid fa-arrow-left me-1"></i> Back to Farmers</a>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="fw-bold text-mandi mb-1">{{ farmer.name }}</h3>
+                <p class="text-muted mb-0"><i class="fa-solid fa-phone me-1"></i>{{ farmer.mobile }} | <i class="fa-solid fa-location-dot me-1"></i>{{ farmer.village }}</p>
+            </div>
+            <a href="{{ url_for('ledger', party_type='Farmer', party_id=farmer.id) }}" class="btn btn-mandi"><i class="fa-solid fa-book me-1"></i> Full Ledger Statement</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3 bg-light">
+            <small class="text-muted">Total Purchases</small>
+            <h4 class="fw-bold">₹{{ "%.2f"|format(totals.total_purchase or 0) }}</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3 bg-light">
+            <small class="text-muted">Total Paid Amount</small>
+            <h4 class="fw-bold text-success">₹{{ "%.2f"|format(totals.total_paid or 0) }}</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3 bg-light">
+            <small class="text-muted">Pending Balance</small>
+            <h4 class="fw-bold text-danger">₹{{ "%.2f"|format(totals.total_pending or 0) }}</h4>
+        </div>
+    </div>
+</div>
+
+<h5 class="fw-bold mb-3">Purchase History</h5>
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>ID</th><th>Date</th><th>Product</th><th>Lots</th><th>KG</th><th>Rate</th><th>Net Payable</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    {% for p in purchases %}
+                    <tr>
+                        <td>#{{ p.id }}</td>
+                        <td>{{ p.date }}</td>
+                        <td>{{ p.product_name }}</td>
+                        <td>{{ p.lots }}</td>
+                        <td>{{ p.kg }}</td>
+                        <td>₹{{ p.rate_per_kg }}</td>
+                        <td class="fw-bold">₹{{ p.net_payable }}</td>
+                        <td><span class="badge bg-{% if p.payment_status=='Paid' %}success{% elif p.payment_status=='Partial' %}warning{% else %}danger{% endif %}">{{ p.payment_status }}</span></td>
+                        <td><a href="{{ url_for('purchase_receipt', id=p.id) }}" class="btn btn-sm btn-outline-secondary">Receipt</a></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="9" class="text-center text-muted py-3">No purchases recorded.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

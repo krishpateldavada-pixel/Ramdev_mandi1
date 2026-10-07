@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ biz.name }} - Mandi Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <input type="hidden" id="lot_weight_val" value="{{ biz.lot_weight }}">
+    
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-mandi sticky-top shadow-sm no-print">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="{{ url_for('dashboard') }}">
+                <i class="fa-solid fa-wheat-awn me-2"></i>{{ biz.name }}
+            </a>
+            <span class="navbar-text text-light d-none d-md-inline me-auto">
+                <small>{{ biz.shop_no }}, {{ biz.market }} | {{ biz.type }}</small>
+            </span>
+            <div class="d-flex align-items-center">
+                {% if session.get('user_id') %}
+                <span class="text-light me-3"><i class="fa-solid fa-user me-1"></i> {{ session.username }} ({{ session.role }})</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-right-from-bracket me-1"></i> Logout</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            {% if session.get('user_id') %}
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-3 no-print">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><i class="fa-solid fa-chart-line me-2"></i> Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint in ['farmers', 'farmer_details'] %}active{% endif %}" href="{{ url_for('farmers') }}"><i class="fa-solid fa-tractor me-2"></i> Farmers</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint in ['customers', 'customer_details'] %}active{% endif %}" href="{{ url_for('customers') }}"><i class="fa-solid fa-users me-2"></i> Customers</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint in ['purchases', 'purchase_form', 'purchase_receipt'] %}active{% endif %}" href="{{ url_for('purchases') }}"><i class="fa-solid fa-cart-shopping me-2"></i> Purchases</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint in ['sales', 'sale_form', 'invoice'] %}active{% endif %}" href="{{ url_for('sales') }}"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Sales</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'stock' %}active{% endif %}" href="{{ url_for('stock') }}"><i class="fa-solid fa-boxes-stacked me-2"></i> Stock</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'payments' %}active{% endif %}" href="{{ url_for('payments') }}"><i class="fa-solid fa-money-bill-wave me-2"></i> Payments</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'ledger' %}active{% endif %}" href="{{ url_for('ledger') }}"><i class="fa-solid fa-book me-2"></i> Ledgers</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'reports' %}active{% endif %}" href="{{ url_for('reports') }}"><i class="fa-solid fa-chart-pie me-2"></i> Reports</a></li>
+                        {% if session.get('role') == 'Admin' %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'settings' %}active{% endif %}" href="{{ url_for('settings') }}"><i class="fa-solid fa-gear me-2"></i> Settings</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            {% else %}
+            <main class="col-12 px-md-4 py-4">
+            {% endif %}
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

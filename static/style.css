@@ -1,0 +1,85 @@
+:root {
+    --primary-color: #1b382b;
+    --primary-hover: #142a20;
+    --secondary-color: #d4a373;
+    --bg-light: #f4f6f8;
+    --text-dark: #2c3e50;
+    --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+}
+
+.bg-mandi {
+    background-color: var(--primary-color) !important;
+}
+
+.text-mandi {
+    color: var(--primary-color) !important;
+}
+
+.btn-mandi {
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+}
+
+.btn-mandi:hover {
+    background-color: var(--primary-hover);
+    color: #fff;
+}
+
+.sidebar {
+    min-height: calc(100vh - 56px);
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+    background-color: #e8f5e9;
+    color: var(--primary-color);
+}
+
+.card-stat {
+    border: none;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease-in-out;
+}
+
+.card-stat:hover {
+    transform: translateY(-3px);
+}
+
+.mandi-header-brand {
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 10px;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .print-only {
+        display: block !important;
+    }
+    .sidebar, .navbar {
+        display: none !important;
+    }
+    main {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}

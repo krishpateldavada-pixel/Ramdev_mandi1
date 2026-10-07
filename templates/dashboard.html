@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0 text-mandi">{{ biz.name }} Dashboard</h2>
+        <small class="text-muted">{{ biz.shop_no }}, {{ biz.location }}</small>
+    </div>
+    <span class="badge bg-secondary p-2 fs-6">
+        <i class="fa-solid fa-scale-balanced me-1"></i> Rule: 1 Lot = {{ biz.lot_weight }} KG
+    </span>
+</div>
+
+<!-- Stock Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card card-stat bg-primary text-white p-3">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-white-50">Jeera Stock</h6>
+                    <h3 class="fw-bold mb-0">{{ "%.1f"|format(metrics.jeera_kg|default(0)|float) }} KG</h3>
+                    <small>{{ "%.1f"|format(metrics.jeera_lots|default(0)|float) }} Lots</small>
+                </div>
+                <i class="fa-solid fa-cubes fa-2x text-white-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card card-stat bg-success text-white p-3">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-white-50">Variyali Stock</h6>
+                    <h3 class="fw-bold mb-0">{{ "%.1f"|format(metrics.variyali_kg|default(0)|float) }} KG</h3>
+                    <small>{{ "%.1f"|format(metrics.variyali_lots|default(0)|float) }} Lots</small>
+                </div>
+                <i class="fa-solid fa-leaf fa-2x text-white-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card card-stat bg-info text-white p-3">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-white-50">Today's Sales</h6>
+                    <h3 class="fw-bold mb-0">₹{{ "%.2f"|format(metrics.today_sales_amt|default(0)|float) }}</h3>
+                    <small>{{ metrics.today_sales_count|default(0) }} Orders</small>
+                </div>
+                <i class="fa-solid fa-cart-shopping fa-2x text-white-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card card-stat bg-warning text-dark p-3">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-dark-50">Today's Profit</h6>
+                    <h3 class="fw-bold mb-0">₹{{ "%.2f"|format(metrics.today_profit|default(0)|float) }}</h3>
+                    <small>Estimated Gain</small>
+                </div>
+                <i class="fa-solid fa-chart-line fa-2x text-dark-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Amounts & Quick Overview -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 p-3">
+            <h6 class="fw-bold text-danger"><i class="fa-solid fa-hand-holding-dollar me-2"></i>Pending Payments to Farmers</h6>
+            <h4 class="fw-bold">₹{{ "%.2f"|format(metrics.pending_farmer_pay|default(0)|float) }}</h4>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 p-3">
+            <h6 class="fw-bold text-success"><i class="fa-solid fa-sack-dollar me-2"></i>Pending Receivables from Customers</h6>
+            <h4 class="fw-bold">₹{{ "%.2f"|format(metrics.pending_customer_pay|default(0)|float) }}</h4>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 p-3">
+            <h6 class="fw-bold mb-3">Stock Overview (KG)</h6>
+            <canvas id="stockChart" height="120"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-3">
+            <h6 class="fw-bold mb-3">Directory Quick Stats</h6>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Total Registered Farmers
+                    <span class="badge bg-mandi rounded-pill">{{ metrics.total_farmers|default(0) }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Total Active Customers
+                    <span class="badge bg-mandi rounded-pill">{{ metrics.total_customers|default(0) }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Transactions -->
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 p-3">
+            <h6 class="fw-bold mb-3 text-mandi"><i class="fa-solid fa-truck-ramp-box me-2"></i>Recent Farmer Purchases</h6>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead><tr><th>ID</th><th>Farmer</th><th>Product</th><th>Qty</th><th>Payable</th></tr></thead>
+                    <tbody>
+                        {% for p in recent_purchases %}
+                        <tr>
+                            <td><a href="{{ url_for('purchase_receipt', id=p.id) }}">#{{ p.id }}</a></td>
+                            <td>{{ p.farmer_name }}</td>
+                            <td>{{ p.product_name }}</td>
+                            <td>{{ p.lots }} Lots ({{ p.kg }} KG)</td>
+                            <td>₹{{ "%.2f"|format(p.net_payable|default(0)|float) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="text-center text-muted">No recent purchases</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 p-3">
+            <h6 class="fw-bold mb-3 text-mandi"><i class="fa-solid fa-file-invoice me-2"></i>Recent Customer Sales</h6>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead><tr><th>ID</th><th>Customer</th><th>Product</th><th>Qty</th><th>Final Amt</th></tr></thead>
+                    <tbody>
+                        {% for s in recent_sales %}
+                        <tr>
+                            <td><a href="{{ url_for('invoice', id=s.id) }}">#{{ s.id }}</a></td>
+                            <td>{{ s.customer_name }}</td>
+                            <td>{{ s.product_name }}</td>
+                            <td>{{ s.lots }} Lots ({{ s.kg }} KG)</td>
+                            <td>₹{{ "%.2f"|format(s.final_amount|default(0)|float) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="text-center text-muted">No recent sales</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js dependency loaded to ensure chart script functions -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById('stockChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Jeera', 'Variyali'],
+            datasets: [{
+                label: 'Current Stock (KG)',
+                data: [{{ metrics.jeera_kg|default(0) }}, {{ metrics.variyali_kg|default(0) }}],
+                backgroundColor: ['#1b382b', '#d4a373']
+            }]
+        },
+        options: { 
+            responsive: true, 
+            scales: { 
+                y: { beginAtZero: true } 
+            } 
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <a href="{{ url_for('sales') }}" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1"></i> Sales</a>
+    <div>
+        <button onclick="window.print()" class="btn btn-mandi me-2"><i class="fa-solid fa-print me-1"></i> Print Invoice</button>
+        <a href="{{ url_for('pdf_invoice', id=s.id) }}" class="btn btn-danger"><i class="fa-solid fa-file-pdf me-1"></i> Download PDF</a>
+    </div>
+</div>
+
+<div class="card shadow-lg border-0 p-4 bg-white" id="invoice">
+    <!-- Header Branding -->
+    <div class="text-center mandi-header-brand mb-4">
+        <h2 class="fw-bold text-mandi mb-0">{{ biz.name }}</h2>
+        <p class="mb-0 fw-semibold">Shop No. {{ biz.shop_no }}, {{ biz.market }}</p>
+        <p class="mb-0 text-muted">{{ biz.type }} | {{ biz.location }}</p>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-6">
+            <h6 class="fw-bold text-mandi">TAX / TRADING INVOICE</h6>
+            <p class="mb-1"><strong>Invoice No:</strong> INV-{{ s.id }}</p>
+            <p class="mb-0"><strong>Date:</strong> {{ s.date }}</p>
+        </div>
+        <div class="col-6 text-end">
+            <h6 class="fw-bold">BILL TO (CUSTOMER)</h6>
+            <p class="mb-1"><strong>{{ s.customer_name }}</strong></p>
+            <p class="mb-1">Address: {{ s.address }}</p>
+            <p class="mb-0">Mobile: {{ s.mobile }}</p>
+        </div>
+    </div>
+
+    <table class="table table-bordered mb-4">
+        <thead class="table-light">
+            <tr>
+                <th>Product Description</th>
+                <th>Lots</th>
+                <th>KG Quantity</th>
+                <th>Rate / KG</th>
+                <th class="text-end">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ s.product_name }}</td>
+                <td>{{ s.lots }} Lots</td>
+                <td>{{ s.kg }} KG</td>
+                <td>₹{{ s.selling_rate_per_kg }}</td>
+                <td class="text-end">₹{{ "%.2f"|format(s.gross_amount) }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="row">
+        <div class="col-6">
+            <p><strong>Payment Status:</strong> <span class="badge bg-secondary">{{ s.payment_status }}</span></p>
+            <p><strong>Notes:</strong> {{ s.notes or 'None' }}</p>
+        </div>
+        <div class="col-6">
+            <table class="table table-sm table-borderless">
+                <tr><td>Gross Amount:</td><td class="text-end">₹{{ "%.2f"|format(s.gross_amount) }}</td></tr>
+                <tr><td>Discount:</td><td class="text-end text-danger">- ₹{{ "%.2f"|format(s.discount) }}</td></tr>
+                <tr><td>Transport Charges:</td><td class="text-end">₹{{ "%.2f"|format(s.transport_charges) }}</td></tr>
+                <tr><td>Other Charges:</td><td class="text-end">₹{{ "%.2f"|format(s.other_charges) }}</td></tr>
+                <tr class="fw-bold border-top"><td>Final Amount:</td><td class="text-end">₹{{ "%.2f"|format(s.final_amount) }}</td></tr>
+                <tr><td>Paid Amount:</td><td class="text-end text-success">₹{{ "%.2f"|format(s.paid_amount) }}</td></tr>
+                <tr class="fw-bold border-top"><td>Remaining Due:</td><td class="text-end text-danger">₹{{ "%.2f"|format(s.remaining_amount) }}</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-5 pt-4 d-flex justify-content-between text-center">
+        <div>
+            <p class="mb-0">___________________________</p>
+            <small>Customer Signature</small>
+        </div>
+        <div>
+            <p class="mb-0">___________________________</p>
+            <small>For {{ biz.name }} (Authorized)</small>
+        </div>
+    </div>
+</div>
+{% endblock %}
